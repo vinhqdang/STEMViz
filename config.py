@@ -6,15 +6,11 @@ from typing import Optional
 
 class Settings(BaseSettings):
     # API Keys
-    openrouter_api_key: str = Field(..., env="OPENROUTER_API_KEY")
     openai_api_key: str = Field(..., env="OPENAI_API_KEY")
     google_api_key: str = Field(..., env="GOOGLE_API_KEY")
 
-    # OpenRouter Configuration
-    openrouter_base_url: str = "https://openrouter.ai/api/v1"
-
     # Model Selection
-    reasoning_model: str = "openai/gpt-4o"  # GPT-4o via OpenRouter for reasoning
+    reasoning_model: str = "gpt-4o"  # GPT-4o for reasoning and code generation
     multimodal_model: str = "gemini-2.0-flash-exp"  # Gemini 2.0 Flash Experimental for multimodal analysis
 
     # OpenAI TTS Configuration

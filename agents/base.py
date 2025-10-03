@@ -8,10 +8,10 @@ from typing import Optional, Dict, Any
 
 
 class BaseAgent(ABC):
-    """Base class for all AI agents using OpenRouter"""
+    """Base class for all AI agents using OpenAI"""
 
-    def __init__(self, api_key: str, base_url: str, model: str, reasoning_effort: Optional[str] = None):
-        self.client = OpenAI(api_key=api_key, base_url=base_url)
+    def __init__(self, api_key: str, model: str, reasoning_effort: Optional[str] = None):
+        self.client = OpenAI(api_key=api_key)
         self.model = model
         self.reasoning_effort = reasoning_effort
         self.logger = logging.getLogger(self.__class__.__name__)

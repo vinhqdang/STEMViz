@@ -27,13 +27,12 @@ class ManimAgent(BaseAgent):
     def __init__(
         self,
         api_key: str,
-        base_url: str,
         model: str,
         output_dir: Path,
         config: Optional[AnimationConfig] = None,
         reasoning_effort: Optional[str] = None
     ):
-        super().__init__(api_key=api_key, base_url=base_url, model=model, reasoning_effort=reasoning_effort)
+        super().__init__(api_key=api_key, model=model, reasoning_effort=reasoning_effort)
         self.output_dir = Path(output_dir)
         self.config = config or AnimationConfig()
 
