@@ -40,9 +40,8 @@ https://github.com/qnguyen3/STEMViz
 - LaTeX (for mathematical notation in animations)
 
 **API Keys Required:**
-- [OpenRouter API Key](https://openrouter.ai/) (for LLM reasoning)
-- [Google AI API Key](https://aistudio.google.com/app/apikey) (for multimodal video analysis)
-- [ElevenLabs API Key](https://elevenlabs.io/) (for text-to-speech)
+- [OpenAI API Key](https://platform.openai.com/api-keys) (for GPT-4o reasoning/code generation and TTS)
+- [Google AI API Key](https://aistudio.google.com/app/apikey) (for Gemini multimodal video analysis)
 
 ---
 
@@ -161,15 +160,13 @@ pip install -r requirements.txt
 
 2. Edit `.env` and add your API keys:
    ```bash
-   OPENROUTER_API_KEY=your_openrouter_key_here
+   OPENAI_API_KEY=your_openai_key_here
    GOOGLE_API_KEY=your_google_ai_key_here
-   ELEVENLABS_API_KEY=your_elevenlabs_key_here
    ```
 
 **Where to get API keys:**
-- **OpenRouter**: Sign up at [openrouter.ai](https://openrouter.ai/) and create an API key
+- **OpenAI**: Sign up at [platform.openai.com](https://platform.openai.com/signup) and create an API key at [API Keys page](https://platform.openai.com/api-keys)
 - **Google AI**: Get a free API key from [Google AI Studio](https://aistudio.google.com/app/apikey)
-- **ElevenLabs**: Sign up at [elevenlabs.io](https://elevenlabs.io/) and get your API key from the profile page
 
 ---
 
@@ -242,10 +239,10 @@ Display in Gradio
 
 - **UI**: Gradio
 - **Animation**: Manim Community Edition
-- **LLMs**: 
-  - Reasoning: Claude Sonnet 4 via OpenRouter
-  - Multimodal: Gemini 2.0 Flash
-- **TTS**: ElevenLabs
+- **LLMs**:
+  - Reasoning/Code Generation: GPT-4o (OpenAI)
+  - Multimodal Video Analysis: Gemini 2.0 Flash Experimental (Google)
+- **TTS**: OpenAI Text-to-Speech (tts-1)
 - **Media Processing**: FFmpeg
 
 ---
@@ -255,8 +252,8 @@ Display in Gradio
 Edit `config.py` to customize:
 
 - **Animation quality**: `manim_quality` (480p15, 720p30, 1080p60, 1440p60)
-- **LLM models**: `reasoning_model`, `multimodal_model`
-- **TTS settings**: `tts_voice_id`, `tts_stability`, `tts_similarity_boost`
+- **LLM models**: `reasoning_model` (default: gpt-4o), `multimodal_model` (default: gemini-2.0-flash-exp)
+- **TTS settings**: `tts_model` (tts-1 or tts-1-hd), `tts_voice` (alloy, echo, fable, onyx, nova, shimmer), `tts_speed`
 - **Video settings**: `video_codec`, `video_crf`, `audio_bitrate`
 - **Timeouts and retries**: Various `*_timeout` and `*_max_retries` settings
 
