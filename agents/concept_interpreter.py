@@ -164,8 +164,6 @@ EXAMPLE (Easy & Clear) for “Area of a Circle”:
         concept = concept.strip()
         if not concept:
             raise ValueError("Concept cannot be empty")
-        if len(concept) > 500:
-            raise ValueError("Concept description too long (max 500 characters)")
 
         # Sanitize input
         concept = self._sanitize_input(concept)

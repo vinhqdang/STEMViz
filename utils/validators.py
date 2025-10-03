@@ -24,9 +24,6 @@ class PipelineValidator:
 
         concept = concept.strip()
 
-        if len(concept) > 500:
-            raise ValidationError("Concept description too long (max 500 characters)")
-
         # Check for potentially harmful content
         if re.search(r'[<>]', concept):
             raise ValidationError("Concept contains invalid characters")
