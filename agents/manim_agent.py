@@ -62,8 +62,8 @@ class ManimAgent(BaseAgent):
 **ANIMATION GUIDELINES**:
 
 1. **Scene Structure**:
-   - Create 1-2 scenes per sub-concept (maximum 8 scenes total)
-   - Each scene should be 15-45 seconds long
+   - Create 1-2 scenes per sub-concept (maximum 16 scenes total)
+   - Each scene should be 20-60 seconds long for thorough explanation
    - Build scenes logically following sub-concept dependencies
    - Start with foundations, progressively add complexity
 

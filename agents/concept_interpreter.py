@@ -43,7 +43,7 @@ SCOPE & CLARITY RULES (Very Important)
 
 ANALYSIS GUIDELINES
 
-1) Concept Decomposition (3–8 sub-concepts)
+1) Concept Decomposition (3–12 sub-concepts)
    - Start with the most concrete foundation.
    - Build step-by-step to the main idea or result.
    - Every sub-concept must be visually representable in Manim or simple diagrams.
