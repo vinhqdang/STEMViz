@@ -7,11 +7,7 @@ from pathlib import Path
 from typing import Optional, Dict, Any, List, Tuple
 from datetime import datetime
 
-try:
-    from google import genai
-except ImportError:
-    # Fallback for older google-genai versions
-    import google.generativeai as genai
+from google import genai
 from pydantic import BaseModel, Field
 
 
