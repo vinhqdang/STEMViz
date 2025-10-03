@@ -28,14 +28,18 @@ def generate_animation(concept: str, progress=gr.Progress()):
         progress(percentage, desc=message)
     
     result = pipeline.run(concept, progress_callback=update_progress)
-    
+
     if result["status"] == "success" and result.get("video_result"):
-        video_path = result["video_result"]["output_path"]
-        if Path(video_path).exists():
+        video_path = result["video_result"].get("output_path")
+        if video_path and Path(video_path).exists():
             return video_path
         else:
+            error_msg = result.get("error_message", "Video file not found")
+            gr.Warning(f"Generation completed but video file not available: {error_msg}")
             return None
     else:
+        error_msg = result.get("error_message", "Unknown error occurred")
+        gr.Warning(f"Generation failed: {error_msg}")
         return None
 
 with gr.Blocks(title="STEMViz") as demo:

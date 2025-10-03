@@ -341,33 +341,29 @@ class VideoCompositor:
             True if successful, False otherwise
         """
         try:
-            # Build FFmpeg command
-            input_video = ffmpeg.input(video_path)
-            input_audio = ffmpeg.input(audio_path)
+            # Build FFmpeg command using subprocess
+            cmd = [
+                'ffmpeg',
+                '-y',  # Overwrite output file
+                '-i', video_path,  # Input video
+                '-i', audio_path,  # Input audio
+                '-c:v', self.video_codec,  # Video codec
+                '-preset', self.video_preset,  # Encoding preset
+                '-crf', str(self.video_crf),  # Quality
+                '-c:a', self.audio_codec,  # Audio codec
+                '-b:a', self.audio_bitrate,  # Audio bitrate
+                '-movflags', '+faststart',  # Optimize for web playback
+                '-pix_fmt', 'yuv420p',  # Ensure compatibility
+                '-shortest',  # Match shortest stream duration
+            ]
 
-            # Create subtitle filter if burning in and subtitle_path provided
+            # Add subtitle filter if burning in
             if self.subtitle_burn_in and subtitle_path:
-                subtitle_filter = self._create_subtitle_filter(subtitle_path)
-                video = input_video.filter('subtitles', subtitle_path)
-            else:
-                video = input_video
+                subtitle_path_escaped = str(subtitle_path).replace('\\', '/').replace(':', '\\:')
+                cmd.extend(['-vf', f"subtitles='{subtitle_path_escaped}'"])
 
-            # Build output
-            output = ffmpeg.output(
-                video,
-                input_audio,
-                output_path,
-                vcodec=self.video_codec,
-                preset=self.video_preset,
-                crf=self.video_crf,
-                acodec=self.audio_codec,
-                audio_bitrate=self.audio_bitrate,
-                movflags='+faststart',  # Optimize for web playback
-                pix_fmt='yuv420p'  # Ensure compatibility
-            )
+            cmd.append(output_path)
 
-            # Run FFmpeg
-            cmd = ffmpeg.compile(output)
             self.logger.info(f"FFmpeg command: {' '.join(cmd)}")
 
             # Execute with timeout
