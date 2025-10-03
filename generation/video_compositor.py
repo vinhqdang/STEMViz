@@ -260,7 +260,19 @@ class VideoCompositor:
     def _get_video_info(self, video_path: str) -> Dict[str, Any]:
         """Get video information using FFprobe"""
         try:
-            probe = ffmpeg.probe(video_path)
+            cmd = [
+                'ffprobe',
+                '-v', 'quiet',
+                '-print_format', 'json',
+                '-show_format',
+                '-show_streams',
+                str(video_path)
+            ]
+            result = subprocess.run(cmd, capture_output=True, text=True, timeout=30)
+            if result.returncode != 0:
+                raise RuntimeError(f"ffprobe failed: {result.stderr}")
+
+            probe = json.loads(result.stdout)
 
             # Video stream info
             video_stream = next((stream for stream in probe['streams'] if stream['codec_type'] == 'video'), None)
@@ -285,7 +297,19 @@ class VideoCompositor:
     def _get_audio_info(self, audio_path: str) -> Dict[str, Any]:
         """Get audio information using FFprobe"""
         try:
-            probe = ffmpeg.probe(audio_path)
+            cmd = [
+                'ffprobe',
+                '-v', 'quiet',
+                '-print_format', 'json',
+                '-show_format',
+                '-show_streams',
+                str(audio_path)
+            ]
+            result = subprocess.run(cmd, capture_output=True, text=True, timeout=30)
+            if result.returncode != 0:
+                raise RuntimeError(f"ffprobe failed: {result.stderr}")
+
+            probe = json.loads(result.stdout)
 
             # Duration
             duration = float(probe['format']['duration'])
