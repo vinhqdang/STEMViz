@@ -7,18 +7,21 @@ from typing import Optional
 class Settings(BaseSettings):
     # API Keys
     openrouter_api_key: str = Field(..., env="OPENROUTER_API_KEY")
+    openai_api_key: str = Field(..., env="OPENAI_API_KEY")
     google_api_key: str = Field(..., env="GOOGLE_API_KEY")
-    elevenlabs_api_key: str = Field(..., env="ELEVENLABS_API_KEY")
 
     # OpenRouter Configuration
     openrouter_base_url: str = "https://openrouter.ai/api/v1"
 
-    # Model Selection (OpenRouter model IDs)
-    reasoning_model: str = "anthropic/claude-sonnet-4.5"
-    multimodal_model: str = "gemini-flash-latest"
+    # Model Selection
+    reasoning_model: str = "openai/gpt-4o"  # GPT-4o via OpenRouter for reasoning
+    multimodal_model: str = "gemini-flash-latest"  # Gemini for multimodal analysis
 
-    # TTS Configuration
-    tts_voice_id: str = "default"
+    # OpenAI TTS Configuration
+    tts_provider: str = "openai"
+    tts_model: str = "tts-1"  # or "tts-1-hd" for higher quality
+    tts_voice: str = "alloy"  # Options: alloy, echo, fable, onyx, nova, shimmer
+    tts_speed: float = 1.0
 
     # Paths
     output_dir: Path = Path("output")
@@ -76,12 +79,6 @@ class Settings(BaseSettings):
     script_generation_timeout: int = 180  # seconds
 
     # Audio Synthesis Settings
-    tts_voice_id: str = "JBFqnCBsd6RMkjVDRZzb"
-    tts_model_id: str = "eleven_multilingual_v2"
-    tts_stability: float = 0.75
-    tts_similarity_boost: float = 0.75
-    tts_style: float = 0.0
-    tts_use_speaker_boost: bool = True
     tts_max_retries: int = 3
     tts_timeout: int = 120  # seconds
 

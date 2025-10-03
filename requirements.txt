@@ -9,8 +9,7 @@ openai>=1.0.0
 # Multimodal LLM (Google Gemini)
 google-genai>=0.8.0
 
-# TTS
-elevenlabs>=1.0.0
+# TTS (OpenAI is included with openai package above)
 
 # Video Processing
 ffmpeg-python>=0.2.0

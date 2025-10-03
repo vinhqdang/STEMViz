@@ -6,12 +6,7 @@ from pathlib import Path
 from typing import Optional, Dict, Any, List, Tuple
 from datetime import datetime
 
-try:
-    from elevenlabs.client import ElevenLabs
-    from elevenlabs import Voice, VoiceSettings, play
-except ImportError:
-    # Fallback for older elevenlabs versions
-    from elevenlabs import ElevenLabs, Voice, VoiceSettings, play
+from openai import OpenAI
 from pydantic import BaseModel, Field
 
 
@@ -37,46 +32,35 @@ class AudioResult(BaseModel):
     # Metadata
     generation_time: Optional[float] = None
     voice_settings: Optional[Dict[str, Any]] = None
-    model_used: str = "eleven_monolingual_v1"
+    model_used: str = "tts-1"
 
 
 class AudioSynthesizer:
     """
     Audio Synthesizer: Converts timestamped scripts into synchronized speech audio
-    using ElevenLabs Text-to-Speech API.
+    using OpenAI Text-to-Speech API.
     """
 
     def __init__(
         self,
         api_key: str,
         output_dir: Path,
-        voice_id: str = "default",
-        model_id: str = "eleven_monolingual_v1",
-        stability: float = 0.75,
-        similarity_boost: float = 0.75,
-        style: float = 0.0,
-        use_speaker_boost: bool = True,
+        model: str = "tts-1",
+        voice: str = "alloy",
+        speed: float = 1.0,
         max_retries: int = 3,
         timeout: int = 120
     ):
         self.api_key = api_key
         self.output_dir = Path(output_dir)
-        self.voice_id = voice_id
-        self.model_id = model_id
-        self.stability = stability
-        self.similarity_boost = similarity_boost
-        self.style = style
-        self.use_speaker_boost = use_speaker_boost
+        self.model = model
+        self.voice = voice
+        self.speed = speed
         self.max_retries = max_retries
         self.timeout = timeout
 
-        # Initialize ElevenLabs client
-        self.client = ElevenLabs(api_key=api_key)
-
-        # Store voice settings for API calls
-        self.voice_id = voice_id
-        self.model_id = model_id
-        self.output_format = "mp3_44100_128"
+        # Initialize OpenAI client
+        self.client = OpenAI(api_key=api_key)
 
         # Ensure output directories exist
         self.output_dir.mkdir(parents=True, exist_ok=True)
@@ -145,7 +129,12 @@ class AudioSynthesizer:
                 total_duration=actual_duration,
                 file_size_mb=file_size_mb,
                 generation_time=generation_time,
-                model_used=self.model_id
+                model_used=self.model,
+                voice_settings={
+                    "voice": self.voice,
+                    "model": self.model,
+                    "speed": self.speed
+                }
             )
 
         except Exception as e:
@@ -154,7 +143,7 @@ class AudioSynthesizer:
                 success=False,
                 error_message=str(e),
                 generation_time=time.time() - start_time,
-                model_used=self.model_id
+                model_used=self.model
             )
 
     def _parse_srt_file(self, script_file: Path) -> List[Dict[str, Any]]:
@@ -206,11 +195,11 @@ class AudioSynthesizer:
 
     def _normalize_timestamp(self, timestamp: str) -> str:
         """Normalize malformed timestamps to proper HH:MM:SS,mmm format"""
-        
+
         timestamp = timestamp.strip()
         timestamp = timestamp.replace('.', ',').replace(':', ',')
         parts = timestamp.split(',')
-        
+
         if len(parts) == 3:
             minutes, seconds, milliseconds = parts
             hours = "00"
@@ -218,24 +207,24 @@ class AudioSynthesizer:
             hours, minutes, seconds, milliseconds = parts
         else:
             raise ValueError(f"Cannot parse timestamp: {timestamp}")
-        
+
         hours = int(hours)
         minutes = int(minutes)
         seconds = int(seconds)
         milliseconds = int(milliseconds)
-        
+
         if minutes >= 60:
             hours += minutes // 60
             minutes = minutes % 60
-        
+
         if seconds >= 60:
             minutes += seconds // 60
             seconds = seconds % 60
-        
+
         if milliseconds >= 1000:
             seconds += milliseconds // 1000
             milliseconds = milliseconds % 1000
-        
+
         return f"{hours:02d}:{minutes:02d}:{seconds:02d},{milliseconds:03d}"
 
     def _timestamp_to_seconds(self, timestamp: str) -> float:
@@ -267,7 +256,7 @@ class AudioSynthesizer:
         return f"{hours:02d}:{minutes:02d}:{seconds:02d},{milliseconds:03d}"
 
     def _generate_audio_segments(self, subtitles: List[Dict[str, Any]]) -> List[AudioSegment]:
-        """Generate audio for each subtitle using ElevenLabs"""
+        """Generate audio for each subtitle using OpenAI TTS"""
 
         audio_segments = []
 
@@ -276,16 +265,16 @@ class AudioSynthesizer:
 
             for attempt in range(self.max_retries):
                 try:
-                    # Generate audio using the correct ElevenLabs API
-                    audio = self.client.text_to_speech.convert(
-                        text=subtitle['text'],
-                        voice_id=self.voice_id,
-                        model_id=self.model_id,
-                        output_format=self.output_format
+                    # Generate audio using OpenAI TTS API
+                    response = self.client.audio.speech.create(
+                        model=self.model,
+                        voice=self.voice,
+                        input=subtitle['text'],
+                        speed=self.speed
                     )
 
-                    # Save audio segment to temporary file
-                    segment_path = self._save_audio_segment(audio, subtitle['sequence'])
+                    # Save audio segment to file
+                    segment_path = self._save_audio_segment(response, subtitle['sequence'])
 
                     # Get actual duration
                     actual_duration = self._get_audio_duration(segment_path)
@@ -313,23 +302,15 @@ class AudioSynthesizer:
 
         return audio_segments
 
-    def _save_audio_segment(self, audio, sequence: int) -> Path:
-        """Save audio segment to temporary file"""
+    def _save_audio_segment(self, response, sequence: int) -> Path:
+        """Save audio segment to file"""
 
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
         filename = f"segment_{sequence:03d}_{timestamp}.mp3"
         filepath = self.output_dir / "segments" / filename
 
-        # Save audio data (ElevenLabs returns generator of bytes chunks)
-        with open(filepath, 'wb') as f:
-            if hasattr(audio, '__iter__') and not isinstance(audio, (bytes, bytearray)):
-                # Audio is a generator, consume it
-                for chunk in audio:
-                    if chunk:
-                        f.write(chunk)
-            else:
-                # Audio is bytes directly
-                f.write(audio)
+        # Write audio bytes to file
+        response.stream_to_file(filepath)
 
         return filepath
 
@@ -423,7 +404,7 @@ class AudioSynthesizer:
             "-ar", "44100",
             str(output_path)
         ]
-        
+
         result = subprocess.run(cmd, capture_output=True, text=True, timeout=30)
         if result.returncode != 0:
             raise RuntimeError(f"Failed to create silence file: {result.stderr}")
@@ -517,8 +498,9 @@ class AudioSynthesizer:
     def get_synthesis_stats(self) -> Dict[str, Any]:
         """Get statistics about audio synthesis performance"""
         return {
-            "voice_id": self.voice_id,
-            "model_id": self.model_id,
+            "voice": self.voice,
+            "model": self.model,
+            "speed": self.speed,
             "max_retries": self.max_retries,
             "timeout": self.timeout,
             "output_dir": str(self.output_dir)

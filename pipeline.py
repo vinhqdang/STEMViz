@@ -65,14 +65,11 @@ class Pipeline:
 
         # Initialize Audio Synthesizer (Phase 3)
         self.audio_synthesizer = AudioSynthesizer(
-            api_key=settings.elevenlabs_api_key,
+            api_key=settings.openai_api_key,
             output_dir=settings.audio_dir,
-            voice_id=settings.tts_voice_id,
-            model_id=settings.tts_model_id,
-            stability=settings.tts_stability,
-            similarity_boost=settings.tts_similarity_boost,
-            style=settings.tts_style,
-            use_speaker_boost=settings.tts_use_speaker_boost,
+            model=settings.tts_model,
+            voice=settings.tts_voice,
+            speed=settings.tts_speed,
             max_retries=settings.tts_max_retries,
             timeout=settings.tts_timeout
         )
@@ -236,7 +233,7 @@ class Pipeline:
                 "models_used": {
                     "reasoning": settings.reasoning_model,
                     "multimodal": settings.multimodal_model,
-                    "tts": settings.tts_model_id
+                    "tts": settings.tts_model
                 },
                 "animation_stats": {
                     "scenes_planned": animation_result.scene_count,
