@@ -7,7 +7,7 @@ from pathlib import Path
 from typing import Optional, Dict, Any, List, Tuple
 from datetime import datetime
 
-from google import genai
+import google.generativeai as genai
 from pydantic import BaseModel, Field
 
 
@@ -56,8 +56,8 @@ class ScriptGenerator:
         self.max_retries = max_retries
         self.timeout = timeout
 
-        # Initialize Gemini client
-        self.client = genai.Client(api_key=api_key)
+        # Initialize Gemini
+        genai.configure(api_key=api_key)
 
         # Ensure output directories exist
         self.output_dir.mkdir(parents=True, exist_ok=True)
@@ -232,27 +232,28 @@ Now analyze the video and generate the narration script following these exact re
                 self.logger.info(f"Uploading video to Gemini (attempt {attempt + 1})")
 
                 # Upload video file to Gemini
-                uploaded_file = self.client.files.upload(file=str(video_file))
+                uploaded_file = genai.upload_file(path=str(video_file))
 
                 # Wait for file to be processed
                 self.logger.info("Waiting for file processing...")
-                while uploaded_file.state == "PROCESSING":
+                while uploaded_file.state.name == "PROCESSING":
                     time.sleep(2)
-                    uploaded_file = self.client.files.get(name=uploaded_file.name)
+                    uploaded_file = genai.get_file(uploaded_file.name)
 
-                if uploaded_file.state == "FAILED":
-                    raise ValueError(f"File processing failed: {uploaded_file.state}")
+                if uploaded_file.state.name == "FAILED":
+                    raise ValueError(f"File processing failed: {uploaded_file.state.name}")
 
-                if uploaded_file.state != "ACTIVE":
-                    raise ValueError(f"Unexpected file state: {uploaded_file.state}")
+                if uploaded_file.state.name != "ACTIVE":
+                    raise ValueError(f"Unexpected file state: {uploaded_file.state.name}")
 
                 self.logger.info(f"File uploaded successfully: {uploaded_file.name}")
 
                 # Generate script with Gemini
                 self.logger.info(f"Generating script with {self.model}")
-                response = self.client.models.generate_content(
-                    model=self.model,
-                    contents=[uploaded_file, self.SCRIPT_GENERATION_PROMPT]
+                model = genai.GenerativeModel(model_name=self.model)
+                response = model.generate_content(
+                    [uploaded_file, self.SCRIPT_GENERATION_PROMPT],
+                    generation_config=genai.GenerationConfig(temperature=self.temperature)
                 )
 
                 script_content = response.text
