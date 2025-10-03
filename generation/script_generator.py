@@ -233,7 +233,7 @@ Now analyze the video and generate the narration script following these exact re
 
                 # Upload video file to Gemini using new SDK
                 self.logger.info("Uploading file...")
-                uploaded_file = self.client.files.upload(path=str(video_file))
+                uploaded_file = self.client.files.upload(file=str(video_file))
 
                 # Wait for file to be processed
                 self.logger.info("Waiting for file processing...")
