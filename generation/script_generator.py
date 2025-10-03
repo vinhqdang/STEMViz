@@ -7,7 +7,7 @@ from pathlib import Path
 from typing import Optional, Dict, Any, List, Tuple
 from datetime import datetime
 
-import google.generativeai as genai
+from google import genai
 from pydantic import BaseModel, Field
 
 
@@ -31,20 +31,20 @@ class ScriptResult(BaseModel):
     # Metadata
     generation_time: Optional[float] = None
     video_duration: Optional[float] = None
-    model_used: str = "gemini-2.5-flash"
+    model_used: str = "gemini-2.0-flash-exp"
 
 
 class ScriptGenerator:
     """
     Script Generator: Analyzes silent animations and generates timestamped narration scripts
-    using Gemini 2.5 Flash for multimodal video understanding.
+    using Gemini 2.0 Flash Experimental for multimodal video understanding.
     """
 
     def __init__(
         self,
         api_key: str,
         output_dir: Path,
-        model: str = "gemini-2.5-flash",
+        model: str = "gemini-2.0-flash-exp",
         temperature: float = 0.8,
         max_retries: int = 3,
         timeout: int = 180
@@ -56,8 +56,8 @@ class ScriptGenerator:
         self.max_retries = max_retries
         self.timeout = timeout
 
-        # Initialize Gemini
-        genai.configure(api_key=api_key)
+        # Initialize Gemini client with new SDK
+        self.client = genai.Client(api_key=api_key)
 
         # Ensure output directories exist
         self.output_dir.mkdir(parents=True, exist_ok=True)
@@ -225,35 +225,35 @@ Now analyze the video and generate the narration script following these exact re
             )
 
     def _generate_script_with_gemini(self, video_file: Path) -> Optional[str]:
-        """Generate script using Gemini 2.5 Flash"""
+        """Generate script using Gemini 2.0 Flash Experimental"""
 
         for attempt in range(self.max_retries):
             try:
                 self.logger.info(f"Uploading video to Gemini (attempt {attempt + 1})")
 
-                # Upload video file to Gemini
-                uploaded_file = genai.upload_file(path=str(video_file))
+                # Upload video file to Gemini using new SDK
+                self.logger.info("Uploading file...")
+                uploaded_file = self.client.files.upload(path=str(video_file))
 
                 # Wait for file to be processed
                 self.logger.info("Waiting for file processing...")
-                while uploaded_file.state.name == "PROCESSING":
+                while uploaded_file.state == "PROCESSING":
                     time.sleep(2)
-                    uploaded_file = genai.get_file(uploaded_file.name)
+                    uploaded_file = self.client.files.get(name=uploaded_file.name)
 
-                if uploaded_file.state.name == "FAILED":
-                    raise ValueError(f"File processing failed: {uploaded_file.state.name}")
+                if uploaded_file.state == "FAILED":
+                    raise ValueError(f"File processing failed: {uploaded_file.state}")
 
-                if uploaded_file.state.name != "ACTIVE":
-                    raise ValueError(f"Unexpected file state: {uploaded_file.state.name}")
+                if uploaded_file.state != "ACTIVE":
+                    raise ValueError(f"Unexpected file state: {uploaded_file.state}")
 
                 self.logger.info(f"File uploaded successfully: {uploaded_file.name}")
 
-                # Generate script with Gemini
+                # Generate script with Gemini using new SDK
                 self.logger.info(f"Generating script with {self.model}")
-                model = genai.GenerativeModel(model_name=self.model)
-                response = model.generate_content(
-                    [uploaded_file, self.SCRIPT_GENERATION_PROMPT],
-                    generation_config=genai.GenerationConfig(temperature=self.temperature)
+                response = self.client.models.generate_content(
+                    model=self.model,
+                    contents=[uploaded_file, self.SCRIPT_GENERATION_PROMPT]
                 )
 
                 script_content = response.text

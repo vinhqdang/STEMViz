@@ -15,7 +15,7 @@ class Settings(BaseSettings):
 
     # Model Selection
     reasoning_model: str = "openai/gpt-4o"  # GPT-4o via OpenRouter for reasoning
-    multimodal_model: str = "gemini-flash-latest"  # Gemini for multimodal analysis
+    multimodal_model: str = "gemini-2.0-flash-exp"  # Gemini 2.0 Flash Experimental for multimodal analysis
 
     # OpenAI TTS Configuration
     tts_provider: str = "openai"

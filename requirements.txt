@@ -6,8 +6,8 @@ manim>=0.18.0
 # LLM Access (unified via OpenRouter)
 openai>=1.0.0
 
-# Multimodal LLM (Google Gemini)
-google-generativeai>=0.8.0
+# Multimodal LLM (Google Gemini) - New SDK
+google-genai
 
 # TTS (OpenAI is included with openai package above)
 
