@@ -62,10 +62,12 @@ class ManimAgent(BaseAgent):
 **ANIMATION GUIDELINES**:
 
 1. **Scene Structure**:
-   - Create 1-2 scenes per sub-concept (maximum 16 scenes total)
+   - Create 2 scenes per sub-concept for comprehensive coverage (aim for 8-16 scenes total)
+   - IMPORTANT: Generate scenes for ALL sub-concepts provided - don't skip any
    - Each scene should be 20-60 seconds long for thorough explanation
    - Build scenes logically following sub-concept dependencies
    - Start with foundations, progressively add complexity
+   - More scenes = better explanations = better educational value
 
 2. **Visual Design**:
    - Use clear, educational visual style (dark background, bright elements)
