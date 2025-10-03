@@ -26,7 +26,7 @@ Transform complex STEM concepts into engaging, narrated video animations with ju
 
 ## Demo
 
-https://github.com/qnguyen3/STEMViz
+https://github.com/vinhqdang/STEMViz
 
 ---
 
@@ -103,7 +103,7 @@ latex --version
 ### Step 2: Clone Repository
 
 ```bash
-git clone https://github.com/qnguyen3/STEMViz.git
+git clone https://github.com/vinhqdang/STEMViz.git
 cd STEMViz
 ```
 
@@ -405,10 +405,10 @@ If you use STEMViz in your research or project, please cite:
 
 ```bibtex
 @software{stemviz2025,
-  author = {Nguyen, Quan},
+  author = {Dang, Vinh Q.},
   title = {STEMViz: AI-Powered STEM Concept Visualizer},
   year = {2025},
-  url = {https://github.com/qnguyen3/STEMViz}
+  url = {https://github.com/vinhqdang/STEMViz}
 }
 ```
 
@@ -416,9 +416,9 @@ If you use STEMViz in your research or project, please cite:
 
 ## Contact
 
-**Quang Nguyen** - [@qnguyen3](https://github.com/qnguyen3)
+**Vinh Dang** - [@vinhqdang](https://github.com/vinhqdang)
 
-Project Link: [https://github.com/qnguyen3/STEMViz](https://github.com/qnguyen3/STEMViz)
+Project Link: [https://github.com/vinhqdang/STEMViz](https://github.com/vinhqdang/STEMViz)
 
 ---
 
